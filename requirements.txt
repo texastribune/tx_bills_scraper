@@ -1,0 +1,4 @@
+pyquery
+couchdb
+ipython
+ipdb
