@@ -5,6 +5,8 @@ import re
 
 URL_TEMPLATE = "http://www.capitol.state.tx.us/BillLookup/History.aspx?LegSess=%s&Bill=%s"
 TEXT_URL_TEMPLATE = "http://www.capitol.state.tx.us/BillLookup/Text.aspx?LegSess=%s&Bill=%s"
+LEG_URL_TEMPLATE = "http://www.legis.state.tx.us/Reports/BillsBy.aspx?cboLegSess=%s"
+LEGISLATOR_URL_TEMPLATE = "http://www.legdir.legis.state.tx.us/MemberInfo.aspx?Chamber=%s&Code=%s"
 
 base_extraction = re.compile('([A-Z]{2})0*([1-9][0-9]*).\.[hH][tT][mM]')
 type_map = {
@@ -33,17 +35,27 @@ def extract_bill_from_file(file):
         type = type_map[type]
     return ''.join((type, number))
 
+
 def convert_to_url(session, file):
     """
     Converts a session and FTP file name to the URL for the state site.
     """
     return to_url(session, extract_bill_from_file(file))
 
+
 def to_url(session, bill):
     """
     Returns a URL for a given legislative session and bill ID
     """
     return URL_TEMPLATE % (session, bill)
+
+
+def to_leg_url(session):
+    """
+    Returns a URL for a given legislative session
+    """
+    return LEG_URL_TEMPLATE % (session)
+
 
 def to_text_url(session, bill):
     return TEXT_URL_TEMPLATE % (session, bill)

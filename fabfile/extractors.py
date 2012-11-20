@@ -4,7 +4,7 @@ import csv
 import re
 from ._utils import to_text_url
 from ._utils import to_url
-
+from ._utils import to_leg_url
 
 import csv, codecs, cStringIO
 
@@ -75,7 +75,6 @@ def extract_raw_html(opts):
     if ret:
         ret.replace('&amp;', '&')
     return ret
-
 
 def extract_committee_name(opts):
     return opts["doc"].find('#cell%s' % opts["type"]).text()
@@ -196,5 +195,26 @@ def data_extractor(session, bill):
         data = func(args)
         if data:
             ret.update(data)
+    return ret
+
+
+def leg_extractor(session):
+    ret = []
+    doc = pq(url=to_leg_url(session))
+    select = doc('select').filter('#cboAuthors')
+    select_list = str(select).split('</option>')
+    # new_select_list = [x for x in select_list if x not in ['<select name="cboAuthors" id="cboAuthors"><option selected="selected" value="none">[Select an author]','</select>'] ]
+    select_list.pop(0)
+    select_list.pop()
+    for opt in select_list:
+        opt_list = []
+        opt1 = opt.split('">')
+        opt2 = opt1[1].split('(')
+        opt3 = opt2[1].split('-')
+        name = opt2[0]
+        chamber = opt3[0]
+        leg_id = opt3[1].rstrip(')')
+        leg = {'name': name, 'leg_id': leg_id, 'chamber': chamber}
+        ret.append(leg)
     return ret
 

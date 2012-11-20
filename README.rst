@@ -26,7 +26,7 @@ In /path/to/texastribune/data.texastribune.org/bills-scraper:
         pp = PrettyPrinter(indent=2)
         pp.pprint(data)
 
-4. Run 'fab scrap', passing in valid session and bill IDs, e.g.:
+4. Run 'fab scrape', passing in valid session and bill IDs, e.g.:
 
-    fab scrap:83R,HB25
+    fab scrape:83R,HB25
 

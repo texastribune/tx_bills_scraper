@@ -18,11 +18,17 @@ mirror --parallel=5
 
 # TODO: make sure to parse available versions as part of this
 @task
-def scrap(session, bill):
-    return tasks.scrap.delay(session, bill)
+def scrape(session, bill):
+    return tasks.scrape.delay(session, bill)
+
 
 @task
-def scrap_all(session=DEFAULT_SESSION, bill_prefix=None, bill_path=DEFAULT_BILL_PATH):
+def scrape_leg(session):
+    return tasks.scrape_leg.delay(session)
+
+
+@task
+def scrape_all(session=DEFAULT_SESSION, bill_prefix=None, bill_path=DEFAULT_BILL_PATH):
     bills = unique_bills(session, bill_path)
     print "scraping %d bills" % len(bills)
     queued = []
@@ -35,7 +41,7 @@ def scrap_all(session=DEFAULT_SESSION, bill_prefix=None, bill_path=DEFAULT_BILL_
             sys.stdout.flush()
         if bill_prefix and not bill_prefix == bill[0:len(bill_prefix)]:
             continue
-        queued.append(scrap(session, bill))
+        queued.append(scrape(session, bill))
 
     timeout = 1200
     counter = 0
@@ -67,7 +73,7 @@ def sync_all():
     # TODO: make this query the FTP server for it
     all_sessions_online = [
         '781', '782', '783', '784', '78R', '791', '792', '793', '79R', '80R',
-        '811', '81R', '82R',
+        '811', '81R', '82R', '83R', 
     ]
 
     for session in all_sessions_online:
