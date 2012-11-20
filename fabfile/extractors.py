@@ -203,18 +203,18 @@ def leg_extractor(session):
     doc = pq(url=to_leg_url(session))
     select = doc('select').filter('#cboAuthors')
     select_list = str(select).split('</option>')
-    # new_select_list = [x for x in select_list if x not in ['<select name="cboAuthors" id="cboAuthors"><option selected="selected" value="none">[Select an author]','</select>'] ]
     select_list.pop(0)
     select_list.pop()
     for opt in select_list:
-        opt_list = []
         opt1 = opt.split('">')
         opt2 = opt1[1].split('(')
         opt3 = opt2[1].split('-')
+
         name = opt2[0]
         chamber = opt3[0]
         leg_id = opt3[1].rstrip(')')
         leg = {'name': name, 'leg_id': leg_id, 'chamber': chamber}
         ret.append(leg)
+
     return ret
 

@@ -29,11 +29,13 @@ def scrape_leg(session):
     from pprint import PrettyPrinter
     pp = PrettyPrinter(indent=2)
     pp.pprint(data)
+
     """
-    if 'DEBUG' in os.environ:
-        from pprint import PrettyPrinter
-        pp = PrettyPrinter(indent=2)
-        pp.pprint(data)
-    else:
-        storage.store(data, scrape.get_logger(**kwargs))
+    For the move to postgres, don't do the storage here.
+    Call the scraper from the bills app and store it through
+    the models.
     """
+    # storage.store(data, scrape.get_logger(**kwargs))
+
+    return data
+
