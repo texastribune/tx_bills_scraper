@@ -2,6 +2,7 @@ import copy
 from pyquery import PyQuery as pq
 import csv
 import re
+import MySQLdb as Database
 from ._utils import to_text_url
 from ._utils import to_url
 from ._utils import to_leg_url
@@ -39,7 +40,7 @@ class UnicodeReader:
         return self
 
 _cached_person_dict = {}
-def person_to_object(name):
+def person_to_object(name, session):
     if not _cached_person_dict:
         print "building..."
         #reader = csv.reader(open("./lawmaker.csv", "r"))
@@ -56,13 +57,44 @@ def person_to_object(name):
                 print "WTF?"
     return _cached_person_dict[name]
 
+
+def session_person_to_object(name, session):
+    db = Database.connect("localhost", "root", "", "tribune_dev")
+    cursor = db.cursor()
+
+    sql = """
+    SELECT 
+      officials_officeholder.division_id AS division_number, officials_politician.first_name AS first_name, 
+      officials_politician.last_name AS last_name, officials_name.name AS name, 
+      officials_officeholder.politician_id AS cms_id, 
+      officials_politicaloffice.slug AS chamber, officials_officeholder.lege_code AS leg_id, 
+      officials_politicalparty.name AS party, officials_politician.slug AS slug 
+    FROM officials_name 
+    LEFT JOIN officials_officeholder ON officials_name.officeholder_id = officials_officeholder.id 
+    LEFT JOIN officials_politician ON officials_officeholder.politician_id = officials_politician.id 
+    LEFT JOIN officials_session ON officials_session.id = officials_name.session_id 
+    LEFT JOIN officials_politicalparty ON officials_politician.party_id = officials_politicalparty.id 
+    LEFT JOIN officials_politicaloffice ON officials_politicaloffice.id = officials_officeholder.office_id 
+    WHERE officials_name.name = '%s' AND officials_session.session = '%s';""" % (name, session)
+
+    cursor.execute(sql)
+    field_names = [i[0] for i in cursor.description]
+    legislator = cursor.fetchone()
+
+    cursor.close()
+    db.close()
+    return dict(zip(field_names, legislator))
+
+
 def extract_people_html(opts):
     if not opts["doc"]:
         return None
     raw_html = extract_raw_html(opts)
     if not raw_html:
         return None
-    return [person_to_object(a.strip()) for a in raw_html.split(u'|')]
+    # result = [person_to_object(a.strip() for a in raw_html.split(u'|')]
+    result = [session_person_to_object(a.strip(), opts['session']) for a in raw_html.split(u'|')]
+    return result
 
 def extract_multiline_html(opts):
     raw_html = extract_raw_html(opts)
@@ -199,8 +231,16 @@ def data_extractor(session, bill):
 
 
 def leg_extractor(session):
+    """
+    Extract legislator data (names and lege_ids)
+    """
     ret = []
     doc = pq(url=to_leg_url(session))
+
+    # print doc
+    # import sys
+    # sys.exit()
+
     select = doc('select').filter('#cboAuthors')
     select_list = str(select).split('</option>')
     select_list.pop(0)
