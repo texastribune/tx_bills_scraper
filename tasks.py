@@ -22,20 +22,17 @@ def scrape(session, bill, **kwargs):
 @task
 def scrape_leg(session):
     """
-    Scrape for a simple list of legislators in a specific session
+    Scrape for a simple list of legislators 
+    (names and lege_ids) for a specific session
     """
     data = leg_extractor(session)
-
-    from pprint import PrettyPrinter
-    pp = PrettyPrinter(indent=2)
-    pp.pprint(data)
 
     """
     For the move to postgres, don't do the storage here.
     Call the scraper from the bills app and store it through
     the models.
     """
-    # storage.store(data, scrape.get_logger(**kwargs))
+    storage.store_leg_name(data, session)
 
     return data
 
