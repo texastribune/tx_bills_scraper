@@ -1,32 +1,28 @@
-To test without a local CouchDB instance:
+Testing locally
 ============
 
-In /path/to/texastribune/data.texastribune.org/bills-scraper:
+In /path/to/texastribune/tx_bills_scraper/:
 
-1. celeryconfig.py
+1. In celeryconfig.py, uncomment this line:
 
-  Uncomment this line:
-
+:: 
     CELERY_ALWAYS_EAGER = True
 
-2. fabfile/storage.py
 
-  Comment out lines 13-14:
+Bill scraper - testing locally
+============
 
-    couch = couchdb.Server('http://tswicegood:password@127.0.0.1:5984/')
+2. Set DEBUG to True and run 'fab scrape', passing in valid session and bill IDs, e.g.:
 
-    db = couch['texas']
+::
+    DEBUG=1 fab scrape:83R,HB25
 
-3. tasks.py
 
-  Make sure DEBUG is set to true (see line 13):
+Legislator scraper - testing locally
+============
 
-    if 'DEBUG' in os.environ:
-        from pprint import PrettyPrinter
-        pp = PrettyPrinter(indent=2)
-        pp.pprint(data)
+2. Set DEBUG to True and run 'fab scrape', passing in a valid session, e.g.:
 
-4. Run 'fab scrape', passing in valid session and bill IDs, e.g.:
-
-    fab scrape:83R,HB25
+::    
+    DEBUG=1 fab scrape_leg:83R
 

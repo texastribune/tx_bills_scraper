@@ -27,12 +27,12 @@ def scrape_leg(session):
     """
     data = leg_extractor(session)
 
-    """
-    For the move to postgres, don't do the storage here.
-    Call the scraper from the bills app and store it through
-    the models.
-    """
-    storage.store_leg_name(data, session)
+    if 'DEBUG' in os.environ:
+        from pprint import PrettyPrinter
+        pp = PrettyPrinter(indent=2)
+        pp.pprint(data)
+    else:
+        storage.store_leg_name(data, session)
 
     return data
 
